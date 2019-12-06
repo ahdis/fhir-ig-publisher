@@ -44,7 +44,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -70,7 +69,6 @@ import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import org.apache.commons.codec.Charsets;
 import org.apache.commons.exec.DefaultExecutor;
 import org.apache.commons.exec.ExecuteWatchdog;
 import org.apache.commons.exec.PumpStreamHandler;
@@ -78,23 +76,15 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.NotImplementedException;
 import org.apache.commons.lang3.SystemUtils;
-import org.hl7.fhir.convertors.IGR2ConvertorAdvisor;
-import org.hl7.fhir.convertors.R2016MayToR4Loader;
 import org.hl7.fhir.convertors.R2016MayToR5Loader;
-import org.hl7.fhir.convertors.R2ToR4Loader;
 import org.hl7.fhir.convertors.R2ToR5Loader;
-import org.hl7.fhir.convertors.R3ToR4Loader;
 import org.hl7.fhir.convertors.R3ToR5Loader;
 import org.hl7.fhir.convertors.R4ToR5Loader;
 import org.hl7.fhir.convertors.TerminologyClientFactory;
-import org.hl7.fhir.convertors.VersionConvertorAdvisor40;
 import org.hl7.fhir.convertors.VersionConvertorAdvisor50;
-import org.hl7.fhir.convertors.VersionConvertor_10_40;
 import org.hl7.fhir.convertors.VersionConvertor_10_50;
 import org.hl7.fhir.convertors.VersionConvertor_14_30;
-import org.hl7.fhir.convertors.VersionConvertor_14_40;
 import org.hl7.fhir.convertors.VersionConvertor_14_50;
-import org.hl7.fhir.convertors.VersionConvertor_30_40;
 import org.hl7.fhir.convertors.VersionConvertor_30_50;
 import org.hl7.fhir.convertors.VersionConvertor_40_50;
 import org.hl7.fhir.exceptions.DefinitionException;
@@ -108,8 +98,6 @@ import org.hl7.fhir.igtools.publisher.Publisher.JsonDependency;
 import org.hl7.fhir.igtools.publisher.Publisher.ListItemEntry;
 import org.hl7.fhir.igtools.publisher.Publisher.ListViewSorterById;
 import org.hl7.fhir.igtools.publisher.utils.IGRegistryMaintainer;
-import org.hl7.fhir.igtools.publisher.utils.IGReleaseUpdater;
-import org.hl7.fhir.igtools.publisher.utils.IGReleaseUpdater.ServerType;
 import org.hl7.fhir.igtools.publisher.utils.IGReleaseVersionDeleter;
 import org.hl7.fhir.igtools.publisher.utils.IGWebSiteMaintainer;
 import org.hl7.fhir.igtools.renderers.BaseRenderer;
@@ -147,6 +135,7 @@ import org.hl7.fhir.r5.model.Base;
 import org.hl7.fhir.r5.model.Bundle;
 import org.hl7.fhir.r5.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r5.model.Bundle.BundleType;
+import org.hl7.fhir.r5.model.CanonicalResource;
 import org.hl7.fhir.r5.model.CanonicalType;
 import org.hl7.fhir.r5.model.CapabilityStatement;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -169,7 +158,6 @@ import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.FhirPublication;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.r5.model.ImplementationGuide.GuidePageGeneration;
-import org.hl7.fhir.r5.utils.GuideParameterCode;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionGroupingComponent;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionPageComponent;
 import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDefinitionParameterComponent;
@@ -178,14 +166,14 @@ import org.hl7.fhir.r5.model.ImplementationGuide.ImplementationGuideDependsOnCom
 import org.hl7.fhir.r5.model.ImplementationGuide.SPDXLicense;
 import org.hl7.fhir.r5.model.ListResource;
 import org.hl7.fhir.r5.model.ListResource.ListResourceEntryComponent;
-import org.hl7.fhir.r5.model.CanonicalResource;
+import org.hl7.fhir.r5.model.Narrative;
+import org.hl7.fhir.r5.model.Narrative.NarrativeStatus;
 import org.hl7.fhir.r5.model.OperationDefinition;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.PrimitiveType;
 import org.hl7.fhir.r5.model.Reference;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ResourceFactory;
-import org.hl7.fhir.r5.model.ResourceType;
 import org.hl7.fhir.r5.model.StringType;
 import org.hl7.fhir.r5.model.StructureDefinition;
 import org.hl7.fhir.r5.model.StructureDefinition.StructureDefinitionContextComponent;
@@ -202,7 +190,6 @@ import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r5.openapi.OpenApiGenerator;
 import org.hl7.fhir.r5.openapi.Writer;
 import org.hl7.fhir.r5.terminologies.ValueSetExpander.ValueSetExpansionOutcome;
-import org.hl7.fhir.r5.test.utils.ToolsHelper;
 import org.hl7.fhir.r5.utils.EOperationOutcome;
 import org.hl7.fhir.r5.utils.FHIRPathEngine;
 import org.hl7.fhir.r5.utils.FHIRPathEngine.IEvaluationContext;
@@ -214,7 +201,6 @@ import org.hl7.fhir.r5.utils.MappingSheetParser;
 import org.hl7.fhir.r5.utils.NPMPackageGenerator;
 import org.hl7.fhir.r5.utils.NPMPackageGenerator.Category;
 import org.hl7.fhir.r5.utils.NarrativeGenerator;
-import org.hl7.fhir.r5.utils.NarrativeGenerator.ILiquidTemplateProvider;
 import org.hl7.fhir.r5.utils.NarrativeGenerator.IReferenceResolver;
 import org.hl7.fhir.r5.utils.NarrativeGenerator.ITypeParser;
 import org.hl7.fhir.r5.utils.NarrativeGenerator.ResourceContext;
@@ -226,13 +212,11 @@ import org.hl7.fhir.r5.utils.client.FHIRToolingClient;
 import org.hl7.fhir.r5.utils.formats.Turtle;
 import org.hl7.fhir.utilities.CSFile;
 import org.hl7.fhir.utilities.CommaSeparatedStringBuilder;
+import org.hl7.fhir.utilities.Inflector;
 import org.hl7.fhir.utilities.IniFile;
-import org.hl7.fhir.utilities.JsonMerger;
 import org.hl7.fhir.utilities.MarkDownProcessor;
 import org.hl7.fhir.utilities.MarkDownProcessor.Dialect;
-import org.hl7.fhir.utilities.NDJsonWriter;
 import org.hl7.fhir.utilities.StandardsStatus;
-import org.hl7.fhir.utilities.TerminologyServiceOptions;
 import org.hl7.fhir.utilities.TextFile;
 import org.hl7.fhir.utilities.Utilities;
 import org.hl7.fhir.utilities.VersionUtilities;
@@ -240,14 +224,14 @@ import org.hl7.fhir.utilities.ZipGenerator;
 import org.hl7.fhir.utilities.cache.NpmPackage;
 import org.hl7.fhir.utilities.cache.PackageCacheManager;
 import org.hl7.fhir.utilities.cache.PackageGenerator.PackageType;
+import org.hl7.fhir.utilities.cache.ToolsVersion;
 import org.hl7.fhir.utilities.json.JSONUtil;
 import org.hl7.fhir.utilities.json.JsonTrackingParser;
-import org.hl7.fhir.utilities.cache.ToolsVersion;
-import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.hl7.fhir.utilities.validation.ValidationMessage;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueSeverity;
 import org.hl7.fhir.utilities.validation.ValidationMessage.IssueType;
 import org.hl7.fhir.utilities.validation.ValidationMessage.Source;
+import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.hl7.fhir.utilities.xhtml.HierarchicalTableGenerator;
 import org.hl7.fhir.utilities.xhtml.XhtmlComposer;
 import org.hl7.fhir.utilities.xhtml.XhtmlNode;
@@ -1822,7 +1806,10 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
       }
     
     
-    loadSpecDetails(context.getBinaries().get("spec.internals"));
+    if (context.getBinaries()!=null && context.getBinaries().get("spec.internals") != null) {
+      loadSpecDetails(context.getBinaries().get("spec.internals"));
+    }
+    
     JsonElement cb = configuration.get("canonicalBase");
     if (cb == null)
       throw new Exception("You must define a canonicalBase in the json file");
@@ -1830,7 +1817,9 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
     loadPubPack();
 
     igpkp = new IGKnowledgeProvider(context, checkAppendSlash(specPath), cb.getAsString(), configuration, errors, VersionUtilities.isR2Ver(version), null);
-    igpkp.loadSpecPaths(specMaps.get(0));
+    if (specMaps!=null && specMaps.size()>0) {
+      igpkp.loadSpecPaths(specMaps.get(0));
+    }
     fetcher.setPkp(igpkp);
 
     if (configuration.has("fixed-business-version")) {
@@ -3531,9 +3520,11 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
     try {        
       if (file.getContentType().contains("json"))
         e = loadFromJson(file);
-      else if (file.getContentType().contains("xml")) {
+      else if (file.getContentType().contains("xml")) 
         e = loadFromXml(file);
-      } else
+      else if (file.getContentType().equals("text/plain"))
+        e = loadFromTxt(file);
+      else
         throw new Exception("Unable to determine file type for "+file.getName());
     } catch (Exception ex) {
       throw new Exception("Unable to parse "+file.getName()+": " +ex.getMessage(), ex);
@@ -3692,6 +3683,34 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
     if (res == null)
       throw new Exception("Unable to parse XML for "+file.getName());
     return res;
+  }
+  
+  private Element loadFromTxt(FetchedFile file) throws Exception {
+    // StructureMap format did not exist in DSTU2, forward compatible from STU3 to R4
+    
+    
+    StructureMapUtilities utils = new StructureMapUtilities(context);
+    StructureMap structureMap =  utils.parse(new String(file.getSource()), file.getName());
+    String url = structureMap.getUrl();
+    structureMap.setTitle(structureMap.getName());
+    String name = structureMap.getName();
+    structureMap.setName(new Inflector().camelCase(name.trim().replace(" ", "_"), true));
+    structureMap.setId(url.substring(url.lastIndexOf("/")+1));
+    structureMap.setStatus(this.getSourceIg().getStatus());
+
+    Narrative narrative = new Narrative();
+    narrative.setStatus(NarrativeStatus.GENERATED);
+    narrative.setDivAsString("<div><pre>" + Utilities.escapeXml(StructureMapUtilities.render(structureMap)) + "</pre></div>");
+    structureMap.setText(narrative);
+    Element e = convertToElement(structureMap);
+
+    // we replace it as xml
+    org.hl7.fhir.r5.elementmodel.XmlParser xp = new org.hl7.fhir.r5.elementmodel.XmlParser(context);
+    ByteArrayOutputStream bs = new ByteArrayOutputStream();
+    xp.compose(e, bs, OutputStyle.PRETTY, null);
+    file.setContentType("application/fhir+xml");
+    file.setSource(bs.toByteArray());
+    return e;
   }
 
   private Element loadFromJsonWithVersionChange(FetchedFile file, String srcV, String dstV) throws Exception {
@@ -4083,7 +4102,6 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
         res = new org.hl7.fhir.dstu2.formats.XmlParser(true).parse(source);
       else
         throw new Exception("Unable to determine file type for "+name);
-
       VersionConvertorAdvisor50 advisor = new IGR2ConvertorAdvisor5();
       return VersionConvertor_10_50.convertResource(res, advisor);
     } else if (parseVersion.equals(Constants.VERSION)) {
@@ -7220,25 +7238,27 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
   }
 
   private void loadMappingSpaces(byte[] source) throws Exception {
-    ByteArrayInputStream is = null;
-    try {
-      DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-      factory.setNamespaceAware(true);
-      DocumentBuilder builder = factory.newDocumentBuilder();
-      is = new ByteArrayInputStream(source);
-      Document doc = builder.parse(is);
-      org.w3c.dom.Element e = XMLUtil.getFirstChild(doc.getDocumentElement());
-      while (e != null) {
-        MappingSpace m = new MappingSpace(XMLUtil.getNamedChild(e, "columnName").getTextContent(), XMLUtil.getNamedChild(e, "title").getTextContent(),
-            XMLUtil.getNamedChild(e, "id").getTextContent(), Integer.parseInt(XMLUtil.getNamedChild(e, "sort").getTextContent()), true, false, false, XMLUtil.getNamedChild(e, "link") != null ? XMLUtil.getNamedChild(e, "link").getTextContent(): XMLUtil.getNamedChild(e, "url").getTextContent());
-        mappingSpaces.put(XMLUtil.getNamedChild(e, "url").getTextContent(), m);
-        org.w3c.dom.Element p = XMLUtil.getNamedChild(e, "preamble");
-        if (p != null)
-          m.setPreamble(new XhtmlParser().parseHtmlNode(p).setName("div"));
-        e = XMLUtil.getNextSibling(e);
+    if (mappingSpaces!=null && source!=null) {
+      ByteArrayInputStream is = null;
+      try {
+        DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
+        factory.setNamespaceAware(true);
+        DocumentBuilder builder = factory.newDocumentBuilder();
+        is = new ByteArrayInputStream(source);
+        Document doc = builder.parse(is);
+        org.w3c.dom.Element e = XMLUtil.getFirstChild(doc.getDocumentElement());
+        while (e != null) {
+          MappingSpace m = new MappingSpace(XMLUtil.getNamedChild(e, "columnName").getTextContent(), XMLUtil.getNamedChild(e, "title").getTextContent(),
+              XMLUtil.getNamedChild(e, "id").getTextContent(), Integer.parseInt(XMLUtil.getNamedChild(e, "sort").getTextContent()), true, false, false, XMLUtil.getNamedChild(e, "link") != null ? XMLUtil.getNamedChild(e, "link").getTextContent(): XMLUtil.getNamedChild(e, "url").getTextContent());
+          mappingSpaces.put(XMLUtil.getNamedChild(e, "url").getTextContent(), m);
+          org.w3c.dom.Element p = XMLUtil.getNamedChild(e, "preamble");
+          if (p != null)
+            m.setPreamble(new XhtmlParser().parseHtmlNode(p).setName("div"));
+          e = XMLUtil.getNextSibling(e);
+        }
+      } catch (Exception e) {
+        throw new Exception("Error processing mappingSpaces.details: "+e.getMessage(), e);
       }
-    } catch (Exception e) {
-      throw new Exception("Error processing mappingSpaces.details: "+e.getMessage(), e);
     }
   }
 

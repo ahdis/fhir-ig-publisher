@@ -85,7 +85,9 @@ public class SimpleFetcher implements IFetchFile {
         ff.setContentType("application/fhir+json");
       else if (path.endsWith("xml"))
         ff.setContentType("application/fhir+xml");
-
+      else if (path.endsWith("map"))
+        ff.setContentType("text/plain");
+      
       InputStream ss = new FileInputStream(f);
       byte[] b = new byte[ss.available()];
       ss.read(b, 0, ss.available());
@@ -209,6 +211,26 @@ public class SimpleFetcher implements IFetchFile {
           fn = findFile(dirs, type+"/"+id+".xml");
         if (fn == null)
           fn = findFile(dirs, type+"/"+id+".json");
+        String error= "";
+        if (fn == null && "structuremap".equals(type.toLowerCase())) {
+          String maps[] = id.split("[\\d\\.]+to[\\d\\.]+");  
+          if(maps.length>0) { 
+          // Mapxtoy and Mapytox conversion, require that they are in a seperate folder which contains xtoy 
+            if (maps!=null && maps.length>0) {
+              String xtoy = id.substring(maps[0].length()); 
+              dirs.removeIf(dir -> !dir.contains(xtoy));
+            }
+            fn = findFile(dirs, maps[0]+".map");
+            if (maps!=null && fn==null) {
+              error += maps[0]+".map ";
+            } 
+          } else {
+            fn = findFile(dirs, id+".map");
+            if (maps!=null && fn==null) {
+              error += id+".map ";
+            } 
+          }
+        }        
         if (fn == null)
           throw new Exception("Unable to find the source file for "+type+"/"+id+": not specified, so tried "+type+"-"+id+".xml, "+id+"."+type+".xml, "+type+"-"+id+".json, "+type+"/"+id+".xml, "+type+"/"+id+".json, "+id+".xml, and "+id+".json (and lowercase resource name variants) in dirs "+dirs.toString());
       } else {
