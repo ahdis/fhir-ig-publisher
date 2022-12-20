@@ -219,7 +219,8 @@ public class IGReleaseUpdater {
         System.out.println("    "+s);
       }  
       if (throwError) {
-        throw new IOException("Error Processing "+folder+", cannot continue. ("+String.join("|", errs)+")");
+//        throw new IOException("Error Processing "+folder+", cannot continue. ("+String.join("|", errs)+")");
+      		System.out.println("Error Processing "+folder+", cannot continue. ("+String.join("|", errs)+")");
       }
     }
   }

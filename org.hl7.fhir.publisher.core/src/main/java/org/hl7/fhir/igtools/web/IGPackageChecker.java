@@ -54,7 +54,8 @@ public class IGPackageChecker {
         checkChangeJsonProp(pck, pf, json, "jurisdiction", jurisdiction);
       }
       if (pck.isNotForPublication()) {
-        throw new Error("Error: the package at "+pf+" is not suitable for publication");
+        System.out.println("Error: the package at "+pf+" is not suitable for publication");
+      	//        throw new Error("Error: the package at "+pf+" is not suitable for publication");
       }
       if (!json.has("fhirVersions")) {
         System.out.println("Problem #2 with "+pf+": missing fhirVersions");

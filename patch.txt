@@ -1,0 +1,4 @@
+patched version for publication of ch-core 3.0.0
+
+
+java -jar org.hl7.fhir.publisher.cli-1.2.24.jar  -Xms3550m -Xmx3550m org.hl7.fhir.igtools.publisher.Publisher -go-publish -source /Users/oliveregger/Documents/github/ch-core -destination /Users/oliveregger/Documents/github/ig-release/www -registry  /Users/oliveregger/Documents/github/ig-release/ig-registry/fhir-ig-list.json -history  /Users/oliveregger/Documents/github/ig-release/ig-history -temp /Users/oliveregger/temp

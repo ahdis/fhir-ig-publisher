@@ -4439,6 +4439,9 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
             if (tempDir.startsWith("/var") && dir.startsWith("/private/var")) {
               dir = dir.substring(8);
             }
+            if (tempDir.startsWith("/tmp") && dir.startsWith("/private/tmp")) {
+              dir = dir.substring(8);
+            }
             String relative = tempDir.length() > dir.length() ? "" : dir.substring(tempDir.length());
             if (relative.length() > 0)
               relative = relative.substring(1);
@@ -7196,6 +7199,7 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
 	    if (SystemUtils.IS_OS_WINDOWS) {
 	      exec.execute(org.apache.commons.exec.CommandLine.parse("cmd /C "+jekyllCommand+" build --destination \""+outputDir+"\""));
 	    } else if (ToolGlobalSettings.hasRubyPath()) {
+	    	jekyllCommand = "/usr/local/bin/jekyll";
         ProcessBuilder processBuilder = new ProcessBuilder(new String("bash -c "+jekyllCommand));
         Map<String, String> env = processBuilder.environment();
         Map<String, String> vars = new HashMap<>();
@@ -7205,6 +7209,7 @@ public class Publisher implements IWorkerContext.ILoggingService, IReferenceReso
         CommandLine shellCommand = new CommandLine("bash").addArgument("-c").addArgument(jekyllCommand+" build --destination "+outputDir, false);        
         exec.execute(shellCommand, vars);     
       } else {
+	    	jekyllCommand = "/usr/local/bin/jekyll";
 	      exec.execute(org.apache.commons.exec.CommandLine.parse(jekyllCommand+" build --destination \""+outputDir+"\""));
 	    }
 	    tts.end();

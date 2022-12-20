@@ -81,7 +81,8 @@ public class PublicationProcess {
     File fSource = checkDirectory(source, res, "Source");
     checkDirectory(rootFolder, res, "Destination");
     
-    String workingRoot = Utilities.path(temp, "web-root-"+new SimpleDateFormat("yyyyMMddhhmmss"));
+//    String workingRoot = Utilities.path(temp, "web-root-"+new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()));
+    String workingRoot = Utilities.path(temp, "web-root-"+new SimpleDateFormat("yyyyMMddhhmmss").format(new Date()));
     Utilities.createDirectory(workingRoot);    
     File fRoot = checkDirectory(workingRoot, res, "Working Web Folder");
     WebSourceProvider src = new WebSourceProvider(workingRoot, source);
@@ -126,7 +127,8 @@ public class PublicationProcess {
     if (!rp.checkCanonicalAndUrl(res, canonical, url)) {
       return res;
     }
-    String destination = rp.getDestination(workingRoot); 
+//    String destination = rp.getDestination(workingRoot); 
+    String destination = rp.getDestination(rootFolder); 
     // ----------------------------------------------
 
     if (!check(res, !(new File(Utilities.path(source, "package-list.json")).exists()), "Source '"+source+"' contains a package-list.json - must not exist")) {
@@ -193,14 +195,14 @@ public class PublicationProcess {
     }    
     check(res, !(new File(destVer).exists()), "Nominated path '"+destVer+"' already exists");
 
-    src.needFile(Utilities.path("templates", "header.template"));
-    src.needFile(Utilities.path("templates", "preamble.template"));
-    src.needFile(Utilities.path("templates", "postamble.template"));
+// FIXME    src.needFile(Utilities.path("templates", "header.template"));
+ // FIXME    src.needFile(Utilities.path("templates", "preamble.template"));
+ // FIXME    src.needFile(Utilities.path("templates", "postamble.template"));
     
     // check to see if there's history template files; if there isn't, copy it in
-    check(res, new File(Utilities.path(workingRoot, "templates", "header.template")).exists(), Utilities.path(workingRoot, "templates", "header.template")+" not found - template not set up properly");
-    check(res, new File(Utilities.path(workingRoot, "templates", "preamble.template")).exists(), Utilities.path(workingRoot, "templates", "preamble.template")+" not found - template not set up properly");
-    check(res, new File(Utilities.path(workingRoot, "templates", "postamble.template")).exists(), Utilities.path(workingRoot, "templates", "postamble.template")+" not found - template not set up properly");
+ // FIXME    check(res, new File(Utilities.path(workingRoot, "templates", "header.template")).exists(), Utilities.path(workingRoot, "templates", "header.template")+" not found - template not set up properly");
+ // FIXME  check(res, new File(Utilities.path(workingRoot, "templates", "preamble.template")).exists(), Utilities.path(workingRoot, "templates", "preamble.template")+" not found - template not set up properly");
+ // FIXME  check(res, new File(Utilities.path(workingRoot, "templates", "postamble.template")).exists(), Utilities.path(workingRoot, "templates", "postamble.template")+" not found - template not set up properly");
       
     // todo: check the license, header, footer?... 
     
@@ -318,7 +320,8 @@ public class PublicationProcess {
     
     // finally
     System.out.println("Rebuild everything for "+Utilities.path(destination, "package-list.json"));
-    Publisher.main(new String[] { "-publish-update", "-folder", fRoot.getAbsolutePath(), "-registry", fRegistry.getAbsolutePath(), "-filter", destination, "-history", history.getAbsolutePath(), "-no-exit"});
+    /// changed to destVers
+    Publisher.main(new String[] { "-publish-update", "-folder", destination, "-registry", fRegistry.getAbsolutePath(), "-filter", destination, "-history", history.getAbsolutePath(), "-no-exit"});
 
     if (milestone) {
       new WebSiteArchiveBuilder().buildArchives(new File(destination), fRoot.getAbsolutePath(), url);   

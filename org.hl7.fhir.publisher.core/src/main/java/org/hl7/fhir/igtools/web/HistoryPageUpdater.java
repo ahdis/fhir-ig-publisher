@@ -35,35 +35,36 @@ public class HistoryPageUpdater {
   }
 
   public void updateHistoryPage(String sourceRepo, String rootFolder, String folder) throws IOException {
-    System.out.println("Update history page at "+folder+" from "+sourceRepo);
-    copyFiles(sourceRepo, folder);
-
-    JsonObject json = JsonParser.parseObjectFromFile(Utilities.path(folder, "package-list.json"));
-    scrubApostrophes(json);
-    String jsonv = JsonParser.compose(json, false);
-
-    String html = TextFile.fileToString(Utilities.path(sourceRepo, "history.template"));
-    html = html.replace("$header$", loadTemplate(rootFolder, folder, "header.template"));
-    html = html.replace("$preamble$", loadTemplate(rootFolder, folder, "preamble.template"));
-    html = html.replace("$postamble$", loadTemplate(rootFolder, folder, "postamble.template"));
-    html = fixParameter(html, "title", json.asString("title"));
-    html = fixParameter(html, "id", json.asString("package-id"));
-    html = fixParameter(html, "json", jsonv);
-    File tgt = new File(Utilities.path(folder, "directory.html"));
-    if (tgt.exists() && TextFile.fileToString(tgt).contains("<div id=\"history-data\"></div>")) {
-      TextFile.stringToFile(html, Utilities.path(folder, "directory.html"), false);      
-    } else {
-      TextFile.stringToFile(html, Utilities.path(folder, "history.html"), false);
-    }
-
-    String index = new File(Utilities.path(folder, "index.html")).exists() ? TextFile.fileToString(Utilities.path(folder, "index.html")) : "XXXXX";
-    if (index.contains("XXXX")) {
-      html = TextFile.fileToString(Utilities.path(sourceRepo, "index.html"));
-      html = fixParameter(html, "title", json.asString("title"));
-      html = fixParameter(html, "id", json.asString("package-id"));
-      html = fixParameter(html, "json", jsonv);
-      TextFile.stringToFile(html, Utilities.path(folder, "index.html"), false);      
-    }
+  System.out.println("ignoring history page at "+folder+" from "+sourceRepo);
+//    System.out.println("Update history page at "+folder+" from "+sourceRepo);
+//    copyFiles(sourceRepo, folder);
+//
+//    JsonObject json = JsonParser.parseObjectFromFile(Utilities.path(folder, "package-list.json"));
+//    scrubApostrophes(json);
+//    String jsonv = JsonParser.compose(json, false);
+//
+//    String html = TextFile.fileToString(Utilities.path(sourceRepo, "history.template"));
+//    html = html.replace("$header$", loadTemplate(rootFolder, folder, "header.template"));
+//    html = html.replace("$preamble$", loadTemplate(rootFolder, folder, "preamble.template"));
+//    html = html.replace("$postamble$", loadTemplate(rootFolder, folder, "postamble.template"));
+//    html = fixParameter(html, "title", json.asString("title"));
+//    html = fixParameter(html, "id", json.asString("package-id"));
+//    html = fixParameter(html, "json", jsonv);
+//    File tgt = new File(Utilities.path(folder, "directory.html"));
+//    if (tgt.exists() && TextFile.fileToString(tgt).contains("<div id=\"history-data\"></div>")) {
+//      TextFile.stringToFile(html, Utilities.path(folder, "directory.html"), false);      
+//    } else {
+//      TextFile.stringToFile(html, Utilities.path(folder, "history.html"), false);
+//    }
+//
+//    String index = new File(Utilities.path(folder, "index.html")).exists() ? TextFile.fileToString(Utilities.path(folder, "index.html")) : "XXXXX";
+//    if (index.contains("XXXX")) {
+//      html = TextFile.fileToString(Utilities.path(sourceRepo, "index.html"));
+//      html = fixParameter(html, "title", json.asString("title"));
+//      html = fixParameter(html, "id", json.asString("package-id"));
+//      html = fixParameter(html, "json", jsonv);
+//      TextFile.stringToFile(html, Utilities.path(folder, "index.html"), false);      
+//    }
   }
 
   private String fixParameter(String html, String name, String value) {
